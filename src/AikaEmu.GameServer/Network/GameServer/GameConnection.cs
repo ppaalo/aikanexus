@@ -1,3 +1,4 @@
+using System;
 using AikaEmu.GameServer.Managers;
 using AikaEmu.GameServer.Models.Account;
 using AikaEmu.GameServer.Models.Units.Character;
@@ -22,12 +23,22 @@ namespace AikaEmu.GameServer.Network.GameServer
         {
             AccountManager.Instance.RemoveAccount(Id);
 
-            if (ActiveCharacter == null) return;
+            if (Account == null || ActiveCharacter == null)
+            {
+                _log.Info("[INFO] Account or ActiveCharacter is null, skipping disconnection handling.");
+                return;
+            }
 
             if (!ActiveCharacter.IsInternalDisconnect)
+            {
+                _log.Info("[INFO] Saving ActiveCharacter before disconnect.");
                 ActiveCharacter.Save();
+            }
 
+            _log.Info("[INFO] Setting ActiveCharacter's friends to offline.");
             ActiveCharacter.Friends.GetOffline();
+
+            _log.Info("[INFO] Despawning ActiveCharacter from the world.");
             WorldManager.Instance.Despawn(ActiveCharacter);
         }
 

@@ -1,5 +1,6 @@
 using System;
 using AikaEmu.GameServer.Managers;
+using AikaEmu.GameServer.Network.Packets.Client;
 using AikaEmu.Shared.Model.Network;
 using AikaEmu.Shared.Network;
 using AikaEmu.Shared.Network.Encryption;
@@ -95,15 +96,33 @@ namespace AikaEmu.GameServer.Network.GameServer
                             {
                                 var pName = Enum.GetName(typeof(ClientOpcode), opcode);
                                 var pType = Type.GetType($"AikaEmu.GameServer.Network.Packets.Client.{pName}");
-                                var packet = (GamePacket) Activator.CreateInstance(pType);
-                                packet.Opcode = opcode;
-                                packet.Connection = connection;
-                                packet.SenderId = sender;
+                                if (pType != null)
+                                {
+                                    var packet = (GamePacket)Activator.CreateInstance(pType);
 
-                                if (opcode != 0x30bf && opcode != 0x3005 && opcode != 0x3006)
-                                    _log.Debug("C->Game: (0x{0:x2}) {1}.", opcode, pName);
+                                    // Inicialize o pacote se ele implementar um método de inicialização
+                                    if (packet is RequestCheckLogin checkLoginPacket)
+                                    {
+                                        // Exemplo de inicialização com dados fictícios (substitua pelos dados reais do stream)
+                                        uint accountId = stream.ReadUInt32();
+                                        string username = stream.ReadString(32);
+                                        string password = stream.ReadString(32);
+                                        checkLoginPacket.Initialize(accountId, username, password);
+                                    }
 
-                                packet.Decode(stream);
+                                    packet.Opcode = opcode;
+                                    packet.Connection = connection;
+                                    packet.SenderId = sender;
+
+                                    if (opcode != 0x30bf && opcode != 0x3005 && opcode != 0x3006)
+                                        _log.Debug("C->Game: (0x{0:x2}) {1}.", opcode, pName);
+
+                                    packet.Decode(stream);
+                                }
+                                else
+                                {
+                                    _log.Error("Packet type not found for opcode: {0} (0x{1:x2})", connection.Ip, opcode);
+                                }
                             }
                             else
                             {

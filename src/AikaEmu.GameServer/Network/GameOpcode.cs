@@ -168,5 +168,6 @@ namespace AikaEmu.GameServer.Network
         InGameState = 0x3CBE,
         RequestDeleteCharToken = 0x3F33,
         PuzzleEventRequest = 0x3F34,
+        RequestCheckLogin = 0x0685,
     }
 }

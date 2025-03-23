@@ -1,6 +1,6 @@
-FRAMEWORK=netcoreapp3.1
+FRAMEWORK=net8.0
 CONFIGURATION=Debug
-RUNTIME=win10-x64
+RUNTIME=win-x64
 
 rm -R bin;
 mkdir -p bin;
